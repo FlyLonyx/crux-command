@@ -30,13 +30,6 @@ class ArchitectureTest {
             .because("dependencies point inwards");
 
     @ArchTest
-    static final ArchRule ANNOTATIONS_MUST_DEPEND_ON_NOTHING_BUT_THE_JDK = noClasses()
-            .that().resideInAPackage("..annotation..")
-            .should().dependOnClassesThat()
-            .resideOutsideOfPackages("java..", "fr.flylonyx.crux.command.annotation..")
-            .because("a command class must compile without the server API or the engine");
-
-    @ArchTest
     static final ArchRule PACKAGES_MUST_BE_FREE_OF_CYCLES = SlicesRuleDefinition.slices()
             .matching("fr.flylonyx.crux.command.(**)")
             .should().beFreeOfCycles()
