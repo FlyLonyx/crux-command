@@ -1,30 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    SpotBugs exclusions.
-
-    Every entry must state why the finding is not a real defect. An exclusion added
-    to silence a warning without that justification is a bug waiting to happen.
--->
+<!-- Every exclusion states why the finding is not a defect. -->
 <FindBugsFilter>
 
-    <!-- Generated test classes carry no production risk. -->
+    <!-- Test code. -->
     <Match>
         <Source name="~.*[\\/]src[\\/]test[\\/].*"/>
-    </Match>
-
-    <!--
-        CxTokens is immutable: the field is assigned once, in a private constructor of a
-        final class, from Collections.unmodifiableList(new ArrayList<>(...)). Returning it
-        exposes nothing a caller can mutate. SpotBugs 4.7 does not track immutable views,
-        so it reports the return as an exposure.
-
-        Scoped to this one method on purpose. EI_EXPOSE_REP2, which catches a constructor
-        storing a caller's mutable collection, stays enabled everywhere: that one is real.
-    -->
-    <Match>
-        <Class name="fr.flylonyx.crux.command.core.parse.CxTokens"/>
-        <Method name="values"/>
-        <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
 
 </FindBugsFilter>
