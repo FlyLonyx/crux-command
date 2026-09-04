@@ -1,0 +1,13 @@
+# Normalise line endings across platforms
+* text=auto eol=lf
+
+*.java   text diff=java
+*.xml    text
+*.yml    text
+*.yaml   text
+*.md     text
+*.bat    text eol=crlf
+
+*.jar    binary
+*.png    binary
+*.zip    binary
