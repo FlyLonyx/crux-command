@@ -7,6 +7,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.library.GeneralCodingRules;
+import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 
 /**
  * Guards the layering the whole design rests on.
@@ -41,6 +42,13 @@ class ArchitectureTest {
             .resideOutsideOfPackages("java..", "fr.flylonyx.crux.command.annotation..")
             .because("a command class must be writable and compilable without dragging in the "
                     + "server API or the engine");
+
+    @ArchTest
+    static final ArchRule PACKAGES_MUST_BE_FREE_OF_CYCLES = SlicesRuleDefinition.slices()
+            .matching("fr.flylonyx.crux.command.(**)")
+            .should().beFreeOfCycles()
+            .because("a cycle means two packages can no longer be understood, moved or tested "
+                    + "apart, which is how a layered design quietly stops being one");
 
     @ArchTest
     static final ArchRule NOTHING_MAY_WRITE_TO_THE_STANDARD_STREAMS =
