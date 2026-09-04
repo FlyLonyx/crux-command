@@ -49,7 +49,7 @@ class CxMatchResultTest {
 
         @Test
         void has_no_failure_to_report() {
-            CxMatchResult result = CxMatchResult.matched(NODE, Collections.<CxArgumentSpan>emptyList());
+            CxMatchResult result = CxMatchResult.matched(NODE, Collections.emptyList());
 
             assertThatThrownBy(result::failure)
                     .isInstanceOf(IllegalStateException.class)
@@ -58,14 +58,14 @@ class CxMatchResultTest {
 
         @Test
         void describes_itself() {
-            CxMatchResult result = CxMatchResult.matched(NODE, Collections.<CxArgumentSpan>emptyList());
+            CxMatchResult result = CxMatchResult.matched(NODE, Collections.emptyList());
 
             assertThat(result).hasToString("matched money with []");
         }
 
         @Test
         void rejects_missing_parts() {
-            assertThatThrownBy(() -> CxMatchResult.matched(null, Collections.<CxArgumentSpan>emptyList()))
+            assertThatThrownBy(() -> CxMatchResult.matched(null, Collections.emptyList()))
                     .isInstanceOf(NullPointerException.class);
             assertThatThrownBy(() -> CxMatchResult.matched(NODE, null))
                     .isInstanceOf(NullPointerException.class);

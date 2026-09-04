@@ -29,7 +29,7 @@ public final class CxContext {
     public CxContext(final CxSender sender, final String label, final List<String> raw) {
         this.sender = Objects.requireNonNull(sender, "sender");
         this.label = Objects.requireNonNull(label, "label");
-        this.raw = new ArrayList<String>(Objects.requireNonNull(raw, "raw"));
+        this.raw = new ArrayList<>(Objects.requireNonNull(raw, "raw"));
     }
 
     /**

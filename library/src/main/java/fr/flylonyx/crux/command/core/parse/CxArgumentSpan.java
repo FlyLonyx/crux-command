@@ -74,7 +74,7 @@ public final class CxArgumentSpan {
      */
     public List<String> extractFrom(final CxTokens tokens) {
         Objects.requireNonNull(tokens, "tokens");
-        final List<String> claimed = new ArrayList<String>(this.count);
+        final List<String> claimed = new ArrayList<>(this.count);
         for (int offset = 0; offset < this.count; offset++) {
             claimed.add(tokens.get(this.first + offset));
         }

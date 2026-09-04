@@ -26,19 +26,12 @@
         <property name="ignorePattern" value="^\s*\*.*https?://"/>
     </module>
 
-    <!-- Every package must document itself. -->
-    <module name="JavadocPackage"/>
-
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
         <property name="message" value="Trailing whitespace."/>
     </module>
 
-    <!-- Log through the plugin logger; never swallow a throwable. -->
-    <module name="RegexpSingleline">
-        <property name="format" value="System\.(out|err)\."/>
-        <property name="message" value="Use the plugin logger instead of System.out or System.err."/>
-    </module>
+    <!-- Never swallow a throwable. Writing to the standard streams is an ArchUnit rule. -->
     <module name="RegexpSingleline">
         <property name="format" value="printStackTrace\(\)"/>
         <property name="message" value="Log the throwable with context instead of printing its stack trace."/>

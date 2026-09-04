@@ -72,7 +72,7 @@ class CxContextTest {
     void carries_a_sender_that_records_what_it_was_told() {
         FakeSender console = FakeSender.console();
 
-        new CxContext(console, "money", Collections.<String>emptyList()).sender().send("done");
+        new CxContext(console, "money", Collections.emptyList()).sender().send("done");
 
         assertThat(console.received()).containsExactly("done");
     }

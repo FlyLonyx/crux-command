@@ -45,7 +45,7 @@ public final class CxMatchResult {
     public static CxMatchResult matched(final CxNode node, final List<CxArgumentSpan> arguments) {
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(arguments, "arguments");
-        return new CxMatchResult(node, new ArrayList<CxArgumentSpan>(arguments), null, null, 0);
+        return new CxMatchResult(node, new ArrayList<>(arguments), null, null, 0);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class CxMatchResult {
      */
     public static CxMatchResult failed(final CxKey failure, final String detail, final int depth) {
         Objects.requireNonNull(failure, "failure");
-        return new CxMatchResult(null, Collections.<CxArgumentSpan>emptyList(), failure, detail, depth);
+        return new CxMatchResult(null, Collections.emptyList(), failure, detail, depth);
     }
 
     /**

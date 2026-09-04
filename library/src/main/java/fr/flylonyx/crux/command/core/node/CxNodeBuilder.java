@@ -39,8 +39,8 @@ public final class CxNodeBuilder {
     private final CxNodeKind kind;
     private final String name;
     private final CxArgumentType<?> argumentType;
-    private final List<String> aliases = new ArrayList<String>();
-    private final List<CxNodeBuilder> children = new ArrayList<CxNodeBuilder>();
+    private final List<String> aliases = new ArrayList<>();
+    private final List<CxNodeBuilder> children = new ArrayList<>();
 
     private String permission;
     private String description = "";
@@ -152,10 +152,16 @@ public final class CxNodeBuilder {
         this.validateAliases();
         this.validateArgument();
 
-        final CxNodeChildren built = this.buildChildren();
-        this.requireReachable(built);
+        final Map<String, CxNode> lookup = new LinkedHashMap<>();
+        final List<CxNode> literals = new ArrayList<>();
+        final List<CxNode> arguments = new ArrayList<>();
+        this.collectChildren(lookup, literals, arguments);
+        this.requireReachable(literals, arguments);
 
-        return new CxNode(this, built);
+        return new CxNode(this,
+                Collections.unmodifiableMap(lookup),
+                Collections.unmodifiableList(literals),
+                Collections.unmodifiableList(arguments));
     }
 
     CxNodeKind kind() {
@@ -200,7 +206,7 @@ public final class CxNodeBuilder {
                     "The argument '" + this.name + "' declares aliases, but only a literal can have them.");
         }
 
-        final Set<String> seen = new LinkedHashSet<String>();
+        final Set<String> seen = new LinkedHashSet<>();
         seen.add(CxNodeNames.lookupKey(this.name));
 
         for (final String alias : this.aliases) {
@@ -231,10 +237,9 @@ public final class CxNodeBuilder {
      *
      * <p>The sort is stable, so equal priorities keep declaration order.
      */
-    private CxNodeChildren buildChildren() {
-        final Map<String, CxNode> lookup = new LinkedHashMap<String, CxNode>();
-        final List<CxNode> literals = new ArrayList<CxNode>();
-        final List<CxNode> arguments = new ArrayList<CxNode>();
+    private void collectChildren(final Map<String, CxNode> lookup,
+                                 final List<CxNode> literals,
+                                 final List<CxNode> arguments) {
 
         for (final CxNodeBuilder child : this.children) {
             final CxNode built = child.build();
@@ -246,14 +251,10 @@ public final class CxNodeBuilder {
         }
 
         arguments.sort(Comparator.comparingInt(CxNode::priority).reversed());
-
-        return new CxNodeChildren(Collections.unmodifiableMap(lookup),
-                Collections.unmodifiableList(literals),
-                Collections.unmodifiableList(arguments));
     }
 
     private void registerLiteral(final Map<String, CxNode> lookup, final List<CxNode> literals, final CxNode child) {
-        final List<String> words = new ArrayList<String>();
+        final List<String> words = new ArrayList<>();
         words.add(child.name());
         words.addAll(child.aliases());
 
@@ -289,8 +290,8 @@ public final class CxNodeBuilder {
         arguments.add(child);
     }
 
-    private void requireReachable(final CxNodeChildren built) {
-        if (this.handler == null && built.literals().isEmpty() && built.arguments().isEmpty()) {
+    private void requireReachable(final List<CxNode> literals, final List<CxNode> arguments) {
+        if (this.handler == null && literals.isEmpty() && arguments.isEmpty()) {
             throw new CxDefinitionException("The " + this.role() + " '" + this.name
                     + "' has no handler and no children, so reaching it could never do anything.");
         }

@@ -34,7 +34,7 @@ class CxTokensTest {
 
         @Test
         void treats_no_tokens_and_no_separator_as_empty() {
-            CxTokens tokens = CxTokens.of(Collections.<String>emptyList(), false);
+            CxTokens tokens = CxTokens.of(Collections.emptyList(), false);
 
             assertThat(tokens.isEmpty()).isTrue();
             assertThat(tokens.trailingSeparator()).isFalse();
@@ -42,7 +42,7 @@ class CxTokensTest {
 
         @Test
         void keeps_a_trailing_separator_even_with_no_tokens() {
-            CxTokens tokens = CxTokens.of(Collections.<String>emptyList(), true);
+            CxTokens tokens = CxTokens.of(Collections.emptyList(), true);
 
             assertThat(tokens.isEmpty()).isTrue();
             assertThat(tokens.trailingSeparator()).isTrue();

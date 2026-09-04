@@ -25,26 +25,30 @@ public final class CxNode {
     private final String name;
     private final List<String> aliases;
     private final CxArgumentType<?> argumentType;
-    private final Optional<String> permission;
+    private final String permission;
     private final String description;
     private final int priority;
-    private final Optional<CxHandler> handler;
+    private final CxHandler handler;
     private final Map<String, CxNode> literalLookup;
     private final List<CxNode> literals;
     private final List<CxNode> arguments;
 
-    CxNode(final CxNodeBuilder declaration, final CxNodeChildren children) {
+    CxNode(final CxNodeBuilder declaration,
+           final Map<String, CxNode> literalLookup,
+           final List<CxNode> literals,
+           final List<CxNode> arguments) {
+
         this.kind = declaration.kind();
         this.name = declaration.name();
-        this.aliases = new ArrayList<String>(declaration.aliases());
+        this.aliases = new ArrayList<>(declaration.aliases());
         this.argumentType = declaration.argumentType();
-        this.permission = Optional.ofNullable(declaration.permission());
+        this.permission = declaration.permission();
         this.description = declaration.description();
         this.priority = declaration.priority();
-        this.handler = Optional.ofNullable(declaration.handler());
-        this.literalLookup = children.lookup();
-        this.literals = children.literals();
-        this.arguments = children.arguments();
+        this.handler = declaration.handler();
+        this.literalLookup = literalLookup;
+        this.literals = literals;
+        this.arguments = arguments;
     }
 
     /**
@@ -95,7 +99,7 @@ public final class CxNode {
      * @return the permission, or empty if this node adds no requirement
      */
     public Optional<String> permission() {
-        return this.permission;
+        return Optional.ofNullable(this.permission);
     }
 
     /**
@@ -125,7 +129,7 @@ public final class CxNode {
      * @return the handler, or empty if this node is only a branch
      */
     public Optional<CxHandler> handler() {
-        return this.handler;
+        return Optional.ofNullable(this.handler);
     }
 
     /**
@@ -134,7 +138,7 @@ public final class CxNode {
      * @return {@code true} if this node has a handler
      */
     public boolean isExecutable() {
-        return this.handler.isPresent();
+        return this.handler != null;
     }
 
     /**
@@ -172,6 +176,6 @@ public final class CxNode {
 
     @Override
     public String toString() {
-        return (this.kind == CxNodeKind.LITERAL ? this.name : "<" + this.name + ">");
+        return this.kind == CxNodeKind.LITERAL ? this.name : "<" + this.name + ">";
     }
 }

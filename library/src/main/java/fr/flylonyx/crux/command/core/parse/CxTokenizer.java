@@ -37,7 +37,7 @@ public final class CxTokenizer {
     public static CxTokens tokenize(final String raw) {
         Objects.requireNonNull(raw, "raw");
 
-        final List<String> values = new ArrayList<String>();
+        final List<String> values = new ArrayList<>();
         final StringBuilder current = new StringBuilder();
 
         boolean started = false;

@@ -37,7 +37,7 @@ public final class CxMatcher {
     public static CxMatchResult match(final CxNode root, final CxTokens tokens) {
         Objects.requireNonNull(root, "root");
         Objects.requireNonNull(tokens, "tokens");
-        return walk(root, tokens, 0, Collections.<CxArgumentSpan>emptyList());
+        return walk(root, tokens, 0, Collections.emptyList());
     }
 
     private static CxMatchResult walk(final CxNode node,
@@ -121,7 +121,7 @@ public final class CxMatcher {
     }
 
     private static List<CxArgumentSpan> extend(final List<CxArgumentSpan> claimed, final CxArgumentSpan addition) {
-        final List<CxArgumentSpan> extended = new ArrayList<CxArgumentSpan>(claimed.size() + 1);
+        final List<CxArgumentSpan> extended = new ArrayList<>(claimed.size() + 1);
         extended.addAll(claimed);
         extended.add(addition);
         return extended;

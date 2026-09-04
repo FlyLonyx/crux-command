@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public final class CxTokens {
 
-    private static final CxTokens EMPTY = new CxTokens(Collections.<String>emptyList(), false);
+    private static final CxTokens EMPTY = new CxTokens(Collections.emptyList(), false);
 
     private final List<String> values;
     private final boolean trailingSeparator;
@@ -35,7 +35,7 @@ public final class CxTokens {
         if (values.isEmpty() && !trailingSeparator) {
             return EMPTY;
         }
-        return new CxTokens(new ArrayList<String>(values), trailingSeparator);
+        return new CxTokens(new ArrayList<>(values), trailingSeparator);
     }
 
     /**
