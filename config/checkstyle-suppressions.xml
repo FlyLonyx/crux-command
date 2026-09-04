@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+
+    <!--
+        Test sources are held to the same structural rules as production code, but
+        documenting every test method adds noise without adding meaning: the test
+        name is the documentation.
+    -->
+    <suppress files="[\\/]src[\\/]test[\\/]"
+              checks="MissingJavadocMethod|MissingJavadocType|JavadocMethod|JavadocType|JavadocStyle|JavadocPackage|VisibilityModifier"/>
+
+    <!--
+        A test class holding only static rule declarations is not a utility class: JUnit
+        still has to instantiate it, so it cannot hide its constructor.
+    -->
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="HideUtilityClassConstructor"/>
+
+    <!-- Test fixtures deliberately contain patterns that the rules exist to forbid. -->
+    <suppress files="[\\/]src[\\/]test[\\/].*[\\/]fixture[\\/]"
+              checks="[a-zA-Z0-9]*"/>
+
+</suppressions>

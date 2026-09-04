@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SpotBugs exclusions.
+
+    Every entry must state why the finding is not a real defect. An exclusion added
+    to silence a warning without that justification is a bug waiting to happen.
+-->
+<FindBugsFilter>
+
+    <!-- Generated test classes carry no production risk. -->
+    <Match>
+        <Source name="~.*[\\/]src[\\/]test[\\/].*"/>
+    </Match>
+
+</FindBugsFilter>
