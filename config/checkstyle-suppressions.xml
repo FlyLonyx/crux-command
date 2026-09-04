@@ -19,6 +19,13 @@
     -->
     <suppress files="[\\/]src[\\/]test[\\/]" checks="HideUtilityClassConstructor"/>
 
+    <!--
+        Test names are sentences describing a behaviour, so underscores read better than
+        camel case: keeps_an_unterminated_quote_as_one_token says what broke at a glance,
+        which is what matters when a build fails.
+    -->
+    <suppress files="[\\/]src[\\/]test[\\/]" checks="MethodName"/>
+
     <!-- Test fixtures deliberately contain patterns that the rules exist to forbid. -->
     <suppress files="[\\/]src[\\/]test[\\/].*[\\/]fixture[\\/]"
               checks="[a-zA-Z0-9]*"/>
