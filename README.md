@@ -2,6 +2,7 @@
 
 **A command framework for PaperSpigot 1.8.8 plugins.**
 
+[![Build](https://github.com/FlyLonyx/crux-command/actions/workflows/build.yml/badge.svg)](https://github.com/FlyLonyx/crux-command/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Java 8](https://img.shields.io/badge/java-8-orange.svg)](https://adoptium.net/)
 [![Minecraft 1.8.8](https://img.shields.io/badge/minecraft-1.8.8-brightgreen.svg)](https://www.spigotmc.org/)
