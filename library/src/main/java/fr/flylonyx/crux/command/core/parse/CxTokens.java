@@ -37,7 +37,7 @@ public final class CxTokens {
         if (values.isEmpty() && !trailingSeparator) {
             return EMPTY;
         }
-        return new CxTokens(Collections.unmodifiableList(new ArrayList<String>(values)), trailingSeparator);
+        return new CxTokens(new ArrayList<String>(values), trailingSeparator);
     }
 
     /**
@@ -46,7 +46,7 @@ public final class CxTokens {
      * @return an unmodifiable list of tokens, in the order they appeared
      */
     public List<String> values() {
-        return this.values;
+        return Collections.unmodifiableList(this.values);
     }
 
     /**
