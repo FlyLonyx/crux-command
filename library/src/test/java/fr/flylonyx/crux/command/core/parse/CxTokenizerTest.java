@@ -90,9 +90,12 @@ class CxTokenizerTest {
                     .containsExactly("say", "prefix suffix");
         }
 
+        /**
+         * A sender halfway through typing a quoted argument has an unterminated quote by
+         * definition, so failing here would break tab completion exactly when it helps most.
+         */
         @Test
         void keeps_an_unterminated_quote_as_one_token() {
-            // A player is still typing. Failing here would break tab completion.
             assertThat(CxTokenizer.tokenize("say \"hello wor").values())
                     .containsExactly("say", "hello wor");
         }
