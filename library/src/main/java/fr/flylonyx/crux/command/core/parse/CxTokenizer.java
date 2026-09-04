@@ -7,21 +7,16 @@ import java.util.Objects;
 /**
  * Splits a raw command line into tokens.
  *
- * <p>The server hands commands over already split on spaces, which loses any grouping the
- * sender intended. Joining the arguments back together and tokenising here is what makes
- * {@code /warp set "spawn area"} behave as one argument rather than two.
+ * <p>The server splits commands on spaces before handing them over, so grouping has to be
+ * recovered here for {@code /warp set "spawn area"} to be one argument.
  *
- * <p>Rules:
  * <ul>
  *   <li>runs of spaces separate tokens and are collapsed;</li>
  *   <li>a double quote opens or closes a section in which spaces are literal;</li>
  *   <li>a backslash escapes the character that follows it, inside quotes or out;</li>
- *   <li>an unterminated quote yields a single token rather than an error.</li>
+ *   <li>an unterminated quote yields a single token, since a sender still typing one has
+ *       an unterminated quote by definition.</li>
  * </ul>
- *
- * <p>That last rule is deliberate. A sender halfway through typing a quoted argument has
- * an unterminated quote by definition, and refusing to tokenise it would break tab
- * completion exactly when it is most useful.
  */
 public final class CxTokenizer {
 

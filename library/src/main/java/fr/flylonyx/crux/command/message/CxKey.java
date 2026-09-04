@@ -3,14 +3,11 @@ package fr.flylonyx.crux.command.message;
 /**
  * Every message the library can produce, with its English default.
  *
- * <p>Each constant carries both the key used when overriding from configuration and the
- * text used when nothing overrides it. Keeping the two together means a new message
- * cannot be added without a default, so the library always works with no configuration
- * at all.
+ * <p>Each constant carries its configuration key and its default text, so a message
+ * cannot be added without a default and the library works unconfigured.
  *
- * <p>Placeholders are written {@code {name}} and are substituted literally. No expression
- * is ever evaluated, so a message cannot be turned into an injection point by whoever
- * edits it.
+ * <p>Placeholders are written {@code {name}} and substituted literally; no expression is
+ * evaluated.
  */
 public enum CxKey {
 

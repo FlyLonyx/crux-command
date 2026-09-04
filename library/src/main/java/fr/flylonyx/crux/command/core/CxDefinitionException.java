@@ -3,12 +3,9 @@ package fr.flylonyx.crux.command.core;
 /**
  * Thrown when a command is declared in a way that cannot work.
  *
- * <p>Two literal branches sharing a name, an argument without a type, a branch that leads
- * nowhere: none of these can produce sensible behaviour, and none of them depend on what a
- * sender types. So they are rejected when the command is built, at server startup, rather
- * than surfacing as a confusing failure the first time somebody runs the command.
- *
- * <p>Messages name the offending node so the author knows where to look.
+ * <p>Clashing literals, an argument without a type, a branch leading nowhere: none of
+ * these depend on what a sender types, so all are rejected at build time rather than at
+ * dispatch. Messages name the offending node.
  */
 public class CxDefinitionException extends RuntimeException {
 

@@ -11,10 +11,9 @@ import fr.flylonyx.crux.command.message.CxKey;
 /**
  * The outcome of routing a command line through a tree.
  *
- * <p>Either a node was reached that can run, or nothing matched. A failure carries how far
- * routing got, which is what lets the engine report the most useful of several possible
- * complaints: told that {@code /money give Notch} is missing an amount rather than that
- * {@code give} is not a sub-command.
+ * <p>Either a node was reached that can run, or nothing matched. A failure records how far
+ * routing got, so {@code /money give Notch} reports a missing amount rather than an
+ * unknown sub-command.
  */
 public final class CxMatchResult {
 

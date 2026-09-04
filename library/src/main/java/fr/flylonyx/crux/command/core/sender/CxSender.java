@@ -3,12 +3,11 @@ package fr.flylonyx.crux.command.core.sender;
 /**
  * Whoever ran a command, seen from the engine.
  *
- * <p>Exposes only the four things the engine actually needs. Keeping it this narrow is
- * what allows routing, permission checks, usage generation and tab completion to be
- * exercised in plain unit tests, with no server and no mocking framework.
+ * <p>Exposes only what routing, permission checks and message sending need, so the engine
+ * can be tested without a server.
  *
  * <p>The Bukkit adapter provides the implementation, and is the only layer permitted to
- * turn one of these back into a concrete server type.
+ * unwrap one back into a concrete server type.
  */
 public interface CxSender {
 

@@ -13,18 +13,14 @@ import fr.flylonyx.crux.command.message.CxKey;
 /**
  * Walks a command tree to decide which handler a command line reaches.
  *
- * <p>Literal children are tried before argument children, so a sub-command always wins
- * over an argument that would also have accepted the same word: {@code /money top} runs
- * the leaderboard rather than looking up a player called {@code top}.
+ * <p>Literal children are tried before argument children, so {@code /money top} runs the
+ * leaderboard rather than looking up a player called {@code top}.
  *
- * <p>Routing backtracks. If a branch matches a token but fails further down, the walk
- * returns and tries the next candidate, so one greedy branch cannot swallow a command that
- * a later branch would have handled. Command trees are small and mostly literal, so the
- * cost of backtracking is not worth trading correctness for.
+ * <p>Routing backtracks: a branch that matches a token but fails further down is
+ * abandoned and the next candidate tried.
  *
- * <p>No value is read here. Routing produces the reached node and the token spans each
- * argument claimed; turning those spans into values is a separate step, which is what
- * makes routing testable without a single argument type existing.
+ * <p>No value is read here. Routing yields the reached node and the token spans each
+ * argument claimed; reading those spans is a separate step.
  */
 public final class CxMatcher {
 

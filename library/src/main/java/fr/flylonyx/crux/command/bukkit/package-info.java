@@ -1,8 +1,7 @@
 /**
  * Bukkit adapter.
  *
- * <p>The only layer aware of the server API. It adapts senders, registers commands into the
- * server command map, and provides the server-backed argument types. Kept deliberately thin
- * so that the behaviour worth testing lives in the platform-independent engine instead.</p>
+ * <p>The only layer aware of the server API. Adapts senders, registers commands into the
+ * server command map, and provides the server-backed argument types.
  */
 package fr.flylonyx.crux.command.bukkit;

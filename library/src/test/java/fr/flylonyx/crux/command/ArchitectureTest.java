@@ -10,11 +10,7 @@ import com.tngtech.archunit.library.GeneralCodingRules;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 
 /**
- * Guards the layering the whole design rests on.
- *
- * <p>These rules are not style preferences. Each one exists because breaking it would
- * quietly undo a property the library promises, so a violation is a build failure rather
- * than a review comment.
+ * Guards the layering the design rests on. A violation fails the build.
  */
 @AnalyzeClasses(
         packages = "fr.flylonyx.crux.command",
@@ -25,34 +21,29 @@ class ArchitectureTest {
     static final ArchRule ENGINE_MUST_NOT_DEPEND_ON_THE_SERVER_API = noClasses()
             .that().resideInAnyPackage("..core..", "..message..")
             .should().dependOnClassesThat().resideInAnyPackage("org.bukkit..", "net.md_5..")
-            .because("the engine is what carries the behaviour worth testing, and it can only be "
-                    + "tested without a server if it never touches the server API");
+            .because("the engine has to be testable without a server");
 
     @ArchTest
     static final ArchRule ENGINE_MUST_NOT_DEPEND_ON_OUTER_LAYERS = noClasses()
             .that().resideInAPackage("..core..")
             .should().dependOnClassesThat().resideInAnyPackage("..reflect..", "..bukkit..")
-            .because("dependencies point inwards; the engine knows nothing of how commands were "
-                    + "declared or which platform runs them");
+            .because("dependencies point inwards");
 
     @ArchTest
     static final ArchRule ANNOTATIONS_MUST_DEPEND_ON_NOTHING_BUT_THE_JDK = noClasses()
             .that().resideInAPackage("..annotation..")
             .should().dependOnClassesThat()
             .resideOutsideOfPackages("java..", "fr.flylonyx.crux.command.annotation..")
-            .because("a command class must be writable and compilable without dragging in the "
-                    + "server API or the engine");
+            .because("a command class must compile without the server API or the engine");
 
     @ArchTest
     static final ArchRule PACKAGES_MUST_BE_FREE_OF_CYCLES = SlicesRuleDefinition.slices()
             .matching("fr.flylonyx.crux.command.(**)")
             .should().beFreeOfCycles()
-            .because("a cycle means two packages can no longer be understood, moved or tested "
-                    + "apart, which is how a layered design quietly stops being one");
+            .because("a cycle makes two packages impossible to move or test apart");
 
     @ArchTest
     static final ArchRule NOTHING_MAY_WRITE_TO_THE_STANDARD_STREAMS =
             GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS
-                    .because("a library writes through the plugin logger, so that server owners "
-                            + "keep control of what is recorded and where");
+                    .because("a library logs through the plugin logger");
 }

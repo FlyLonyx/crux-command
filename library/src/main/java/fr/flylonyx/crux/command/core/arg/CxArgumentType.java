@@ -3,10 +3,9 @@ package fr.flylonyx.crux.command.core.arg;
 /**
  * Turns tokens into a value of a given type.
  *
- * <p>Implementations describe one kind of argument: a number, a player, a duration. The
- * engine asks how many tokens the type consumes so it can route without knowing anything
- * about the values themselves, which is what lets a location argument spanning three
- * tokens sit in the tree beside a single-token number.
+ * <p>Implementations describe one kind of argument: a number, a player, a duration.
+ * Declaring how many tokens the type consumes lets a three-token location sit in the tree
+ * beside a single-token number.
  *
  * @param <T> the type produced
  */

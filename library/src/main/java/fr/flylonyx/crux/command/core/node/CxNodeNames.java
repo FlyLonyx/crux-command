@@ -15,9 +15,8 @@ final class CxNodeNames {
     /**
      * Normalises a word for case-insensitive lookup.
      *
-     * <p>{@link Locale#ROOT} on purpose: under a Turkish locale the default lowercasing
-     * turns {@code I} into a dotless {@code i}, which would silently stop {@code /INFO}
-     * from matching {@code info} on some servers and not others.
+     * <p>{@link Locale#ROOT} because a Turkish locale lowercases {@code I} to a dotless
+     * {@code i}, which would stop {@code /INFO} matching {@code info}.
      */
     static String lookupKey(final String word) {
         return word.toLowerCase(Locale.ROOT);

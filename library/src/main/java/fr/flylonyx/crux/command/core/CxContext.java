@@ -10,13 +10,8 @@ import fr.flylonyx.crux.command.core.sender.CxSender;
 /**
  * Everything a handler is given when its command runs.
  *
- * <p>Carries who ran the command, under which label, and the words they typed. Handlers
- * that only need the sender can ignore the rest; a handler that wants to echo the raw
- * input back has it without the engine having to guess.
- *
- * <p>Deliberately independent of the parsing package: the tokens reaching a handler are
- * plain strings, so nothing downstream of the engine has to understand how they were
- * produced.
+ * <p>Carries who ran the command, under which label, and the words they typed as plain
+ * strings. Independent of the parsing package on purpose.
  */
 public final class CxContext {
 
@@ -50,8 +45,8 @@ public final class CxContext {
      * Returns the alias the command was invoked under.
      *
      * <p>A command registered as {@code money} with the alias {@code bal} reports
-     * {@code bal} here when the sender typed {@code /bal}, which is what a generated usage
-     * string should echo back rather than the canonical name.
+     * {@code bal} when the sender typed {@code /bal}. Generated usage echoes this rather
+     * than the canonical name.
      *
      * @return the label, without the leading slash
      */

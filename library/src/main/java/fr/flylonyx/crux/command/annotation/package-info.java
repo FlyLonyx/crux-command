@@ -1,7 +1,6 @@
 /**
- * Declarative API: the annotations placed on command classes, methods and parameters.
+ * Annotations placed on command classes, methods and parameters.
  *
- * <p>This package contains annotation types only. It depends on nothing outside the JDK,
- * so a command class can be written and compiled without pulling in the server API.</p>
+ * <p>Contains annotation types only, and depends on nothing outside the JDK.
  */
 package fr.flylonyx.crux.command.annotation;

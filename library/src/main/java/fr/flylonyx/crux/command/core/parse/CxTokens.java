@@ -8,10 +8,8 @@ import java.util.Objects;
 /**
  * The result of tokenising a command line.
  *
- * <p>Holds the tokens themselves and whether the raw input ended on a separator. That
- * second piece of information matters for tab completion: {@code /money give} and
- * {@code /money give } produce the same tokens but call for different suggestions, the
- * first completing {@code give} and the second offering the next argument.
+ * <p>The trailing separator matters for tab completion: {@code /money give} and
+ * {@code /money give } produce the same tokens but call for different suggestions.
  */
 public final class CxTokens {
 

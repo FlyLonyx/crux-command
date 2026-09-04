@@ -10,9 +10,8 @@ import fr.flylonyx.crux.command.core.node.CxNode;
 /**
  * Which tokens an argument node claimed while routing.
  *
- * <p>Routing decides the shape of a command; reading the values comes after. Recording the
- * span rather than the value keeps those two concerns apart, so the tree can be walked and
- * tested without any argument type having to parse anything.
+ * <p>Recording the span rather than the value keeps routing separate from reading, so the
+ * tree can be walked without any argument type parsing anything.
  */
 public final class CxArgumentSpan {
 

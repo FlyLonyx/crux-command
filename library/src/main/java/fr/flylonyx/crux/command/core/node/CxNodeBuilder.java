@@ -16,9 +16,8 @@ import fr.flylonyx.crux.command.core.arg.CxArgumentType;
 /**
  * Assembles a command tree.
  *
- * <p>This is the API the annotation reader targets, and the one to use directly when the
- * shape of a command is only known at runtime: sub-commands coming from configuration, or
- * a branch per entry in a database.
+ * <p>The annotation reader targets this API. Use it directly when the shape of a command
+ * is only known at runtime, such as one branch per entry in a configuration file.
  *
  * <pre>{@code
  * CxNodeBuilder kits = CxNodeBuilder.literal("kit").permission("crux.kit.use");
@@ -30,11 +29,10 @@ import fr.flylonyx.crux.command.core.arg.CxArgumentType;
  * CxNode tree = kits.build();
  * }</pre>
  *
- * <p>Builders are mutable and not thread safe. The tree they produce is neither.
+ * <p>Builders are mutable and not thread safe; the tree they produce is immutable.
  *
- * <p>Everything that cannot depend on what a sender types is checked in {@link #build()}
- * and reported as a {@link CxDefinitionException}. A command that is wrong fails at
- * startup, named, rather than behaving strangely later.
+ * <p>{@link #build()} rejects declarations that could never work, throwing
+ * {@link CxDefinitionException} naming the node responsible.
  */
 public final class CxNodeBuilder {
 
@@ -229,11 +227,9 @@ public final class CxNodeBuilder {
     }
 
     /**
-     * Builds and validates the children, then orders them for routing.
+     * Builds and validates the children, ordering arguments by priority, highest first.
      *
-     * <p>Argument children are sorted by priority, highest first. The sort is stable, so
-     * arguments of equal priority keep the order they were declared in and routing stays
-     * predictable across builds.
+     * <p>The sort is stable, so equal priorities keep declaration order.
      */
     private CxNodeChildren buildChildren() {
         final Map<String, CxNode> lookup = new LinkedHashMap<String, CxNode>();

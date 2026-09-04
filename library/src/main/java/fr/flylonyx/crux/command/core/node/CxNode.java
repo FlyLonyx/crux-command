@@ -11,14 +11,13 @@ import fr.flylonyx.crux.command.core.arg.CxArgumentType;
 /**
  * One step in a command.
  *
- * <p>A command is a tree of these. {@code /money give <target> <amount>} is a literal node
- * {@code money} holding a literal child {@code give}, which holds an argument child
- * {@code target}, which holds an argument child {@code amount} carrying the handler.
+ * <p>{@code /money give <target> <amount>} is a literal node {@code money} holding a
+ * literal child {@code give}, holding an argument child {@code target}, holding an
+ * argument child {@code amount} that carries the handler.
  *
- * <p>Instances are immutable once built and therefore safe to read from any thread, which
- * is what allows dispatch and tab completion to run without locking. Build one with
- * {@link CxNodeBuilder#literal(String)} or {@link CxNodeBuilder#argument(String,
- * CxArgumentType)}.
+ * <p>Immutable once built, so dispatch and tab completion read it without locking. Build
+ * one with {@link CxNodeBuilder#literal(String)} or
+ * {@link CxNodeBuilder#argument(String, CxArgumentType)}.
  */
 public final class CxNode {
 

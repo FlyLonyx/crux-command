@@ -39,9 +39,7 @@ class CxKeyTest {
         }
     }
 
-    /**
-     * A mismatch between the two would silently move an override onto the wrong message.
-     */
+    /** A mismatch would move an override onto the wrong message. */
     @Test
     void a_configuration_key_matches_the_constant_it_belongs_to() {
         for (CxKey key : CxKey.values()) {
