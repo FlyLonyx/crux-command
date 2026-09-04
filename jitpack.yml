@@ -1,0 +1,11 @@
+# JitPack defaults to a recent JDK, which cannot run the Checkstyle and SpotBugs
+# versions this project pins to stay on Java 8. Without this, every build fails.
+jdk:
+  - openjdk8
+
+# JitPack packages a commit that CI has already verified, so it only needs to build
+# and install the published module. Quality gates belong in the build workflow, not
+# in the artifact resolution path of every consumer.
+install:
+  - mvn -B -ntp install -pl library -am
+    -DskipTests -Djacoco.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true
