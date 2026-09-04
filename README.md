@@ -7,23 +7,34 @@
 [![Java 8](https://img.shields.io/badge/java-8-orange.svg)](https://adoptium.net/)
 [![Minecraft 1.8.8](https://img.shields.io/badge/minecraft-1.8.8-brightgreen.svg)](https://www.spigotmc.org/)
 
-You describe what a command does. The library derives the rest — routing,
-argument parsing, permission checks, tab completion, usage strings and error
-messages.
+You describe what a command does. The library derives the rest — routing, argument
+parsing, permission checks, tab completion, usage strings and error messages.
 
-> **Status: in development.** The public API is not frozen yet and no release is
-> published. Installation instructions will land with `1.0.0`.
+## Status
 
----
+In development, working towards 1.0.0. No release is published yet.
 
-## What it removes
+| | |
+|---|---|
+| Command tree, tokenising, routing | done |
+| Argument types and validation | next |
+| Messages and usage generation | planned |
+| Bukkit adapter and registration | planned |
+| Annotation layer | planned |
+| Tab completion, help, execution guards | planned |
 
-Writing a command for Spigot 1.8.8 normally means declaring it in `plugin.yml`,
-implementing `CommandExecutor`, splitting `String[] args` by hand, validating
-every value, writing a second `TabCompleter` that duplicates the first, and
-repeating the same permission and sender checks in every branch.
+The API shown below is the target design. What is built today is the engine underneath
+it: an immutable command tree, a tokenizer that handles quoting, and routing with
+backtracking — none of which touch the server API.
 
-Crux Command removes all of it.
+## The problem
+
+Writing a command for Spigot 1.8.8 means declaring it in `plugin.yml`, implementing
+`CommandExecutor`, splitting `String[] args` by hand, validating every value, writing a
+second `TabCompleter` that duplicates the first, and repeating the same permission and
+sender checks in every branch.
+
+## The target API
 
 ```java
 @Command(name = "money", aliases = {"bal", "balance"})
@@ -56,30 +67,34 @@ public void onEnable() {
 }
 ```
 
-That is the whole setup. No `plugin.yml` entry, no `CommandExecutor`, no
-`TabCompleter`, no manual parsing.
+No `plugin.yml` entry, no `CommandExecutor`, no `TabCompleter`, no manual parsing. From
+the class above the library derives the aliases and sub-commands, typed argument
+resolution with a clear message when a value is invalid, tab completion filtered by
+permission, a paginated `/money help`, and permission and sender checks applied before
+anything is parsed.
 
-Generated automatically from the class above:
+For commands whose shape is only known at runtime, the same engine is reachable directly:
 
-- `/money`, `/bal` and `/balance`, plus the `/money give` sub-command
-- typed argument resolution, with a clear message when a player or a number is
-  invalid
-- tab completion on every node, filtered by permission
-- `/money help`, paginated and clickable, showing only what the sender may run
-- permission and sender-type checks, applied before anything is parsed
+```java
+CxNodeBuilder kits = CxNodeBuilder.literal("kit").permission("crux.kit.use");
 
-## Design highlights
+for (Kit kit : kitService.loadAll()) {
+    kits.then(CxNodeBuilder.literal(kit.name())
+            .permission("crux.kit." + kit.name())
+            .executes(context -> kit.giveTo(context.sender())));
+}
+```
+
+## Design
 
 - **No runtime dependencies.** Only `paperspigot-api`, at `provided` scope.
-- **No reflection at dispatch time.** Annotations are read once at startup and
-  compiled into `MethodHandle` invokers.
-- **Commands are instances.** Register `new MoneyCommand(economy)` and inject
-  dependencies through the constructor like any other class.
-- **No static mutable state.** One manager per plugin, fully isolated.
-- **Clean unregistration.** No ghost commands or class loader leaks after a
-  `/reload`.
-- **Extensible.** Register your own argument types, conditions and suggestion
-  providers.
+- **Commands are instances.** Register `new MoneyCommand(economy)` and inject dependencies
+  through the constructor like any other class.
+- **No static mutable state.** One manager per plugin.
+- **The engine knows nothing about Bukkit.** Routing, parsing and usage generation work
+  against a `CxSender` interface, so they are tested without a server. An ArchUnit test
+  fails the build if that boundary is crossed.
+- **Extensible.** Register your own argument types, conditions and suggestion providers.
 
 ## Requirements
 
@@ -91,9 +106,9 @@ Generated automatically from the class above:
 
 ## Part of Crux
 
-Crux is a suite of libraries that handle the recurring plumbing of Minecraft
-plugin development — menus, commands, configuration, storage — so plugin code
-stays focused on features. Each library lives in its own repository.
+Crux is a suite of libraries covering the recurring plumbing of Minecraft plugin
+development — menus, commands, configuration, storage — so plugin code stays focused on
+features. Each library lives in its own repository.
 
 ## License
 

@@ -5,22 +5,14 @@
 
 <suppressions>
 
-    <!--
-        Test sources are held to the same structural rules as production code, but
-        documenting every test method adds noise without adding meaning: the test
-        name is the documentation.
-    -->
+    <!-- Test names are sentences, and a test method documents itself. -->
     <suppress files="[\\/]src[\\/]test[\\/]"
-              checks="MissingJavadocMethod|MissingJavadocType|JavadocMethod|JavadocType|JavadocStyle|JavadocPackage|VisibilityModifier"/>
+              checks="MissingJavadocMethod|MissingJavadocType|JavadocMethod|JavadocType|JavadocStyle|JavadocPackage|VisibilityModifier|MethodName"/>
 
-    <!--
-        A test class holding only static rule declarations is not a utility class: JUnit
-        still has to instantiate it, so it cannot hide its constructor.
-    -->
+    <!-- JUnit instantiates test classes, so they cannot hide a constructor. -->
     <suppress files="[\\/]src[\\/]test[\\/]" checks="HideUtilityClassConstructor"/>
 
-    <!-- Test fixtures deliberately contain patterns that the rules exist to forbid. -->
-    <suppress files="[\\/]src[\\/]test[\\/].*[\\/]fixture[\\/]"
-              checks="[a-zA-Z0-9]*"/>
+    <!-- Fixtures exist to reproduce the patterns the rules forbid. -->
+    <suppress files="[\\/]src[\\/]test[\\/].*[\\/]fixture[\\/]" checks="[a-zA-Z0-9]*"/>
 
 </suppressions>

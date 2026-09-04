@@ -7,5 +7,4 @@ jdk:
 # and install the published module. Quality gates belong in the build workflow, not
 # in the artifact resolution path of every consumer.
 install:
-  - mvn -B -ntp install -pl library -am
-    -DskipTests -Djacoco.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true
+  - mvn -B -ntp install -DskipTests -Djacoco.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true

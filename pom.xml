@@ -30,7 +30,6 @@
 
     <modules>
         <module>library</module>
-        <module>example</module>
     </modules>
 
     <properties>
