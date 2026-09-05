@@ -1,5 +1,6 @@
 package fr.flylonyx.crux.command.core.arg;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import fr.flylonyx.crux.command.core.CxDefinitionException;
@@ -31,6 +32,7 @@ public final class CxArgumentTypes {
             new CxNumberArgumentType<>("double", CxKey.INVALID_DECIMAL, CxNumberArgumentType::readDouble);
     private static final CxArgumentType<Boolean> BOOLEAN = new CxBooleanArgumentType();
     private static final CxArgumentType<UUID> UUID_TYPE = new CxUuidArgumentType();
+    private static final CxArgumentType<Duration> DURATION = new CxDurationArgumentType();
 
     private CxArgumentTypes() {
     }
@@ -169,6 +171,15 @@ public final class CxArgumentTypes {
      */
     public static CxArgumentType<UUID> uuid() {
         return UUID_TYPE;
+    }
+
+    /**
+     * Returns a type reading a duration written as amounts and units, such as {@code 2h30m}.
+     *
+     * @return the type
+     */
+    public static CxArgumentType<Duration> duration() {
+        return DURATION;
     }
 
     /**
