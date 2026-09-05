@@ -17,15 +17,16 @@ In development, working towards 1.0.0. No release is published yet.
 | | |
 |---|---|
 | Command tree, tokenising, routing | done |
-| Argument types and validation | next |
-| Messages and usage generation | planned |
+| Argument types, bounds, optional arguments | done |
+| Messages and usage generation | next |
 | Bukkit adapter and registration | planned |
 | Annotation layer | planned |
 | Tab completion, help, execution guards | planned |
 
 The API shown below is the target design. What is built today is the engine underneath
-it: an immutable command tree, a tokenizer that handles quoting, and routing with
-backtracking — none of which touch the server API.
+it: an immutable command tree, a tokenizer that handles quoting, routing with
+backtracking, and the argument types values are read through — none of which touch the
+server API.
 
 ## The problem
 
@@ -81,9 +82,15 @@ CxNodeBuilder kits = CxNodeBuilder.literal("kit").permission("crux.kit.use");
 for (Kit kit : kitService.loadAll()) {
     kits.then(CxNodeBuilder.literal(kit.name())
             .permission("crux.kit." + kit.name())
-            .executes(context -> kit.giveTo(context.sender())));
+            .then(CxNodeBuilder.argument("amount", CxArgumentTypes.integer(1, 64))
+                    .optional("1")
+                    .executes(context -> kit.giveTo(context.sender(),
+                            context.arguments().get("amount", Integer.class)))));
 }
 ```
+
+Both `/kit starter` and `/kit starter 5` reach the same handler; the first reads the
+default. A value outside the bounds never gets there.
 
 ## Design
 
