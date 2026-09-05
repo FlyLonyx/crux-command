@@ -19,7 +19,7 @@ import fr.flylonyx.crux.command.message.CxKey;
  * <p>Routing backtracks: a branch that matches a token but fails further down is
  * abandoned and the next candidate tried.
  *
- * <p>No value is read here. Routing yields the reached node and the token spans each
+ * <p>No value is read here. Routing yields the path taken and the token spans each
  * argument claimed; reading those spans is a separate step.
  */
 public final class CxMatcher {
@@ -32,21 +32,22 @@ public final class CxMatcher {
      *
      * @param root   the node the command was registered under
      * @param tokens the tokens that followed the label
-     * @return the reached node and its argument spans, or why nothing matched
+     * @return the path reached and its argument spans, or why nothing matched
      */
     public static CxMatchResult match(final CxNode root, final CxTokens tokens) {
         Objects.requireNonNull(root, "root");
         Objects.requireNonNull(tokens, "tokens");
-        return walk(root, tokens, 0, Collections.emptyList());
+        return walk(root, tokens, 0, Collections.emptyList(), Collections.singletonList(root));
     }
 
     private static CxMatchResult walk(final CxNode node,
                                       final CxTokens tokens,
                                       final int index,
-                                      final List<CxArgumentSpan> claimed) {
+                                      final List<CxArgumentSpan> claimed,
+                                      final List<CxNode> path) {
 
         if (index >= tokens.size()) {
-            return exhausted(node, index, claimed);
+            return exhausted(node, index, claimed, path);
         }
 
         final String token = tokens.get(index);
@@ -54,7 +55,8 @@ public final class CxMatcher {
 
         final Optional<CxNode> literal = node.literal(token);
         if (literal.isPresent()) {
-            final CxMatchResult result = walk(literal.get(), tokens, index + 1, claimed);
+            final CxMatchResult result =
+                    walk(literal.get(), tokens, index + 1, claimed, extend(path, literal.get()));
             if (result.isMatched()) {
                 return result;
             }
@@ -66,15 +68,15 @@ public final class CxMatcher {
             if (span == 0) {
                 continue;
             }
-            final CxMatchResult result =
-                    walk(argument, tokens, index + span, extend(claimed, new CxArgumentSpan(argument, index, span)));
+            final CxMatchResult result = walk(argument, tokens, index + span,
+                    extend(claimed, new CxArgumentSpan(argument, index, span)), extend(path, argument));
             if (result.isMatched()) {
                 return result;
             }
             best = preferred(best, result);
         }
 
-        return best == null ? rejected(node, token, index) : best;
+        return best == null ? rejected(node, token, index, path) : best;
     }
 
     /**
@@ -85,21 +87,26 @@ public final class CxMatcher {
      * rejects an optional argument that leads nowhere runnable, so the first one found
      * settles the outcome and there is no second candidate to fall back to.
      */
-    private static CxMatchResult exhausted(final CxNode node, final int index, final List<CxArgumentSpan> claimed) {
+    private static CxMatchResult exhausted(final CxNode node,
+                                           final int index,
+                                           final List<CxArgumentSpan> claimed,
+                                           final List<CxNode> path) {
+
         if (node.isExecutable()) {
-            return CxMatchResult.matched(node, claimed);
+            return CxMatchResult.matched(path, claimed);
         }
 
         for (final CxNode argument : node.arguments()) {
             if (argument.isOptional()) {
-                return exhausted(argument, index, extend(claimed, CxArgumentSpan.omitted(argument, index)));
+                return exhausted(argument, index,
+                        extend(claimed, CxArgumentSpan.omitted(argument, index)), extend(path, argument));
             }
         }
 
         if (!node.arguments().isEmpty()) {
-            return CxMatchResult.failed(CxKey.MISSING_ARGUMENT, node.arguments().get(0).name(), index);
+            return CxMatchResult.failed(CxKey.MISSING_ARGUMENT, node.arguments().get(0).name(), index, path);
         }
-        return CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, null, index);
+        return CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, null, index, path);
     }
 
     /**
@@ -109,14 +116,18 @@ public final class CxMatcher {
      * surplus. A node offering only arguments reached here because none of them had enough
      * tokens left to claim, which is a missing argument rather than an unknown word.
      */
-    private static CxMatchResult rejected(final CxNode node, final String token, final int index) {
+    private static CxMatchResult rejected(final CxNode node,
+                                          final String token,
+                                          final int index,
+                                          final List<CxNode> path) {
+
         if (node.literals().isEmpty() && node.arguments().isEmpty()) {
-            return CxMatchResult.failed(CxKey.TOO_MANY_ARGUMENTS, token, index);
+            return CxMatchResult.failed(CxKey.TOO_MANY_ARGUMENTS, token, index, path);
         }
         if (node.literals().isEmpty()) {
-            return CxMatchResult.failed(CxKey.MISSING_ARGUMENT, node.arguments().get(0).name(), index);
+            return CxMatchResult.failed(CxKey.MISSING_ARGUMENT, node.arguments().get(0).name(), index, path);
         }
-        return CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, token, index);
+        return CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, token, index, path);
     }
 
     /**
@@ -132,9 +143,9 @@ public final class CxMatcher {
         return arity <= available ? arity : 0;
     }
 
-    private static List<CxArgumentSpan> extend(final List<CxArgumentSpan> claimed, final CxArgumentSpan addition) {
-        final List<CxArgumentSpan> extended = new ArrayList<>(claimed.size() + 1);
-        extended.addAll(claimed);
+    private static <T> List<T> extend(final List<T> values, final T addition) {
+        final List<T> extended = new ArrayList<>(values.size() + 1);
+        extended.addAll(values);
         extended.add(addition);
         return extended;
     }
