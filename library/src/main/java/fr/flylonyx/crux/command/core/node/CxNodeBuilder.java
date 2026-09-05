@@ -334,12 +334,18 @@ public final class CxNodeBuilder {
         }
     }
 
+    /**
+     * Reports whether reaching a node with no token left still runs something.
+     *
+     * <p>Children are built first, so an optional argument here has already passed this
+     * same check; that it exists is enough.
+     */
     private static boolean runsWithoutTokens(final CxNode node) {
         if (node.isExecutable()) {
             return true;
         }
         for (final CxNode argument : node.arguments()) {
-            if (argument.isOptional() && runsWithoutTokens(argument)) {
+            if (argument.isOptional()) {
                 return true;
             }
         }
