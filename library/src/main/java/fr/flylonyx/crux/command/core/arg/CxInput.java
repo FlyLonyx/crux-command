@@ -71,8 +71,6 @@ public final class CxInput {
     /**
      * Returns the first token.
      *
-     * <p>All a type of arity one ever needs.
-     *
      * @return the first token
      */
     public String first() {

@@ -36,7 +36,7 @@ public interface CxArgumentType<T> {
      * Reads the value the sender typed.
      *
      * @param input  the tokens this argument claimed, never empty
-     * @param sender who ran the command, for types whose result depends on them
+     * @param sender who ran the command, for a type that reads a value relative to them
      * @return the value, never {@code null}
      * @throws CxParseException if the tokens describe no valid value
      */
@@ -45,9 +45,7 @@ public interface CxArgumentType<T> {
     /**
      * Suggests the values that would complete a partial token.
      *
-     * <p>Only worth overriding for a type with a listable set of values. Suggestions are
-     * filtered again against what the sender may run, so returning a value here is not a
-     * promise that it will be offered.
+     * <p>Only worth overriding for a type whose values can be listed.
      *
      * @param partial what the sender has typed so far, possibly empty
      * @param sender  who is completing, so results can be narrowed to them

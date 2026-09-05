@@ -7,8 +7,8 @@ import fr.flylonyx.crux.command.message.CxKey;
  * Reads text, in one of three shapes.
  *
  * <p>One token of any content, one token that must be a single word, or every remaining
- * token joined by a space. Quoting is the tokeniser's business, so a quoted phrase already
- * arrives here as one token, which is what a single word has to refuse.
+ * token joined by a space. Quoting is the tokeniser's business, so a quoted phrase arrives
+ * here as one token. That is what the single-word shape refuses.
  */
 final class CxTextArgumentType implements CxArgumentType<String> {
 

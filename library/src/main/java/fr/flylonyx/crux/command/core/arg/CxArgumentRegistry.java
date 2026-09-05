@@ -9,17 +9,16 @@ import java.util.UUID;
 import fr.flylonyx.crux.command.core.CxDefinitionException;
 
 /**
- * Which argument type reads which Java type.
+ * Which argument type reads which Java class.
  *
- * <p>The annotation layer looks a command method's parameter types up here, so registering
- * a type replaces how that class is read across every command at once.
+ * <p>Registering a type replaces how that class is read across every command at once.
  *
  * <pre>{@code
- * registry.register(OfflinePlayer.class, new VanishAwarePlayerType(server));
+ * registry.register(String.class, CxArgumentTypes.word());
  * }</pre>
  *
- * <p>One registry per plugin, filled during startup and only read afterwards. It carries
- * no static state and is not safe to write to from more than one thread.
+ * <p>One registry per plugin, filled during startup and only read afterwards. It holds no
+ * static state and is not safe to write to from more than one thread.
  */
 public final class CxArgumentRegistry {
 

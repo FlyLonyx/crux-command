@@ -23,9 +23,9 @@ public final class CxParseException extends Exception {
     private static final long serialVersionUID = 1L;
 
     private final CxKey key;
-    private final LinkedHashMap<String, String> placeholders;
+    private final Map<String, String> placeholders;
 
-    private CxParseException(final CxKey key, final LinkedHashMap<String, String> placeholders) {
+    private CxParseException(final CxKey key, final Map<String, String> placeholders) {
         super(key.configKey() + " " + placeholders, null, false, false);
         this.key = key;
         this.placeholders = placeholders;
@@ -45,7 +45,7 @@ public final class CxParseException extends Exception {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(input, "input");
 
-        final LinkedHashMap<String, String> filled = new LinkedHashMap<>();
+        final Map<String, String> filled = new LinkedHashMap<>();
         filled.put("argument", input.argument());
         filled.put("value", input.joined());
         return new CxParseException(key, filled);
@@ -62,7 +62,7 @@ public final class CxParseException extends Exception {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(value, "value");
 
-        final LinkedHashMap<String, String> extended = new LinkedHashMap<>(this.placeholders);
+        final Map<String, String> extended = new LinkedHashMap<>(this.placeholders);
         extended.put(name, value);
         return new CxParseException(this.key, extended);
     }
