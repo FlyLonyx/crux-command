@@ -18,15 +18,15 @@ In development, working towards 1.0.0. No release is published yet.
 |---|---|
 | Command tree, tokenising, routing | done |
 | Argument types, bounds, optional arguments | done |
-| Messages and usage generation | next |
-| Bukkit adapter and registration | planned |
+| Messages, usage generation, error rendering | done |
+| Bukkit adapter and registration | next |
 | Annotation layer | planned |
 | Tab completion, help, execution guards | planned |
 
 The API shown below is the target design. What is built today is the engine underneath
 it: an immutable command tree, a tokenizer that handles quoting, routing with
-backtracking, and the argument types values are read through — none of which touch the
-server API.
+backtracking, the argument types values are read through, and the messages a failure is
+reported with — none of which touch the server API.
 
 ## The problem
 
