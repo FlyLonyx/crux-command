@@ -1,5 +1,7 @@
 package fr.flylonyx.crux.command.core.arg;
 
+import java.util.UUID;
+
 import fr.flylonyx.crux.command.core.CxDefinitionException;
 import fr.flylonyx.crux.command.message.CxKey;
 
@@ -27,6 +29,8 @@ public final class CxArgumentTypes {
             new CxNumberArgumentType<>("float", CxKey.INVALID_DECIMAL, CxNumberArgumentType::readFloat);
     private static final CxArgumentType<Double> DOUBLE =
             new CxNumberArgumentType<>("double", CxKey.INVALID_DECIMAL, CxNumberArgumentType::readDouble);
+    private static final CxArgumentType<Boolean> BOOLEAN = new CxBooleanArgumentType();
+    private static final CxArgumentType<UUID> UUID_TYPE = new CxUuidArgumentType();
 
     private CxArgumentTypes() {
     }
@@ -147,5 +151,35 @@ public final class CxArgumentTypes {
      */
     public static CxArgumentType<Double> doubleNumber(final double min, final double max) {
         return new CxNumberArgumentType<>("double", CxKey.INVALID_DECIMAL, CxNumberArgumentType::readDouble, min, max);
+    }
+
+    /**
+     * Returns a type reading {@code true} or {@code false}, ignoring case.
+     *
+     * @return the type
+     */
+    public static CxArgumentType<Boolean> booleanValue() {
+        return BOOLEAN;
+    }
+
+    /**
+     * Returns a type reading a unique id in the dashed form the platform prints.
+     *
+     * @return the type
+     */
+    public static CxArgumentType<UUID> uuid() {
+        return UUID_TYPE;
+    }
+
+    /**
+     * Returns a type reading one constant of an enum, by name and ignoring case.
+     *
+     * @param target the enum to read
+     * @param <E>    the enum type
+     * @return the type
+     * @throws CxDefinitionException if the enum declares no constant
+     */
+    public static <E extends Enum<E>> CxArgumentType<E> enumOf(final Class<E> target) {
+        return new CxEnumArgumentType<>(target);
     }
 }
