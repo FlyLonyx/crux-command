@@ -194,11 +194,19 @@ public final class CxNode {
         return Optional.ofNullable(this.literalLookup.get(CxNodeNames.lookupKey(token)));
     }
 
-    @Override
-    public String toString() {
+    /**
+     * The way this node appears in a usage line: a word, {@code <required>} or
+     * {@code [optional]}.
+     */
+    String token() {
         if (this.kind == CxNodeKind.LITERAL) {
             return this.name;
         }
         return this.isOptional() ? "[" + this.name + "]" : "<" + this.name + ">";
+    }
+
+    @Override
+    public String toString() {
+        return this.token();
     }
 }
