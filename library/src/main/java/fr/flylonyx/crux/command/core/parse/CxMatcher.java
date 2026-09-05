@@ -79,11 +79,26 @@ public final class CxMatcher {
 
     /**
      * Decides the outcome when the sender ran out of input.
+     *
+     * <p>An optional argument is taken as left out rather than as missing, which is what
+     * lets {@code /home} run the same handler as {@code /home <name>}.
      */
     private static CxMatchResult exhausted(final CxNode node, final int index, final List<CxArgumentSpan> claimed) {
         if (node.isExecutable()) {
             return CxMatchResult.matched(node, claimed);
         }
+
+        for (final CxNode argument : node.arguments()) {
+            if (!argument.isOptional()) {
+                continue;
+            }
+            final CxMatchResult result =
+                    exhausted(argument, index, extend(claimed, CxArgumentSpan.omitted(argument, index)));
+            if (result.isMatched()) {
+                return result;
+            }
+        }
+
         if (!node.arguments().isEmpty()) {
             return CxMatchResult.failed(CxKey.MISSING_ARGUMENT, node.arguments().get(0).name(), index);
         }

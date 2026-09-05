@@ -132,6 +132,25 @@ class CxMatchResultTest {
         }
 
         @Test
+        void stand_for_an_argument_the_sender_left_out() {
+            CxArgumentSpan span = CxArgumentSpan.omitted(ARGUMENT, 2);
+
+            assertThat(span.isOmitted()).isTrue();
+            assertThat(span.count()).isZero();
+            assertThat(span.first()).isEqualTo(2);
+            assertThat(span.extractFrom(CxTokenizer.tokenize("give"))).isEmpty();
+            assertThat(span).hasToString("target[omitted]");
+        }
+
+        @Test
+        void reject_an_omission_that_could_not_have_happened() {
+            assertThatThrownBy(() -> CxArgumentSpan.omitted(null, 0))
+                    .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> CxArgumentSpan.omitted(ARGUMENT, -1))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
         void reject_bounds_that_could_not_describe_a_claim() {
             assertThatThrownBy(() -> new CxArgumentSpan(null, 0, 1))
                     .isInstanceOf(NullPointerException.class);
