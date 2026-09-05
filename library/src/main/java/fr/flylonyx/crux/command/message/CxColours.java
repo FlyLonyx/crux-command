@@ -3,9 +3,9 @@ package fr.flylonyx.crux.command.message;
 /**
  * Colour codes, in the two forms the client accepts.
  *
- * <p>Templates are written with {@code &} and translated on the way out. Anything a sender
- * typed is stripped of both forms first, so a player called {@code &c&lNotch} cannot dress
- * their name up as part of the message around it.
+ * <p>Templates are written with {@code &} and translated on the way out. A value a sender
+ * typed is stripped of its codes first, so nothing they type can colour the message around
+ * it or pass itself off as part of one.
  */
 final class CxColours {
 
@@ -52,7 +52,9 @@ final class CxColours {
         for (int index = 0; index < text.length(); index++) {
             if (!removable(text, index)) {
                 stripped.append(text.charAt(index));
-            } else if (opensCode(text, index)) {
+                continue;
+            }
+            if (opensCode(text, index)) {
                 index++;
             }
         }

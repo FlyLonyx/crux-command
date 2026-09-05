@@ -81,6 +81,9 @@ public final class CxMessages {
     /**
      * Builds a message, ready to send.
      *
+     * <p>The colour codes are already translated. Running the result through a second
+     * translation would colour whatever the sender typed into it.
+     *
      * @param key    the message to build
      * @param values what to substitute, by placeholder name
      * @return the message, with colour codes translated
