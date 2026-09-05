@@ -12,6 +12,9 @@ import fr.flylonyx.crux.command.core.node.CxNode;
  *
  * <p>Recording the span rather than the value keeps routing separate from reading, so the
  * tree can be walked without any argument type parsing anything.
+ *
+ * <p>A span of no token stands for an optional argument the sender left out; whoever reads
+ * the span uses the node's default in its place.
  */
 public final class CxArgumentSpan {
 
@@ -38,6 +41,27 @@ public final class CxArgumentSpan {
         this.count = count;
     }
 
+    private CxArgumentSpan(final CxNode node, final int first) {
+        this.node = node;
+        this.first = first;
+        this.count = 0;
+    }
+
+    /**
+     * Creates a span for an optional argument the sender left out.
+     *
+     * @param node  the argument node that was left out
+     * @param first where the argument would have started
+     * @return the span
+     */
+    public static CxArgumentSpan omitted(final CxNode node, final int first) {
+        Objects.requireNonNull(node, "node");
+        if (first < 0) {
+            throw new IllegalArgumentException("first must not be negative, was " + first);
+        }
+        return new CxArgumentSpan(node, first);
+    }
+
     /**
      * Returns the argument node that claimed the tokens.
      *
@@ -59,17 +83,26 @@ public final class CxArgumentSpan {
     /**
      * Returns how many tokens were claimed.
      *
-     * @return the token count
+     * @return the token count, zero if the argument was left out
      */
     public int count() {
         return this.count;
     }
 
     /**
+     * Reports whether the sender left this argument out.
+     *
+     * @return {@code true} if no token was claimed
+     */
+    public boolean isOmitted() {
+        return this.count == 0;
+    }
+
+    /**
      * Extracts the claimed tokens.
      *
      * @param tokens the tokens the span refers to
-     * @return an unmodifiable list of the claimed tokens
+     * @return an unmodifiable list of the claimed tokens, empty if the argument was left out
      * @throws IndexOutOfBoundsException if the span falls outside the given tokens
      */
     public List<String> extractFrom(final CxTokens tokens) {
@@ -83,6 +116,9 @@ public final class CxArgumentSpan {
 
     @Override
     public String toString() {
+        if (this.count == 0) {
+            return this.node.name() + "[omitted]";
+        }
         return this.node.name() + "[" + this.first + ".." + (this.first + this.count - 1) + "]";
     }
 }

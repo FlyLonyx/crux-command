@@ -18,20 +18,22 @@ class CxContextTest {
     private static final List<String> ARGS = Arrays.asList("Notch", "5");
 
     @Test
-    void exposes_the_sender_the_label_and_the_raw_arguments() {
+    void exposes_the_sender_the_label_the_arguments_and_the_raw_input() {
         FakeSender sender = FakeSender.player("Steve");
+        CxArguments arguments = CxArguments.of(Collections.singletonMap("target", "Notch"));
 
-        CxContext context = new CxContext(sender, "bal", ARGS);
+        CxContext context = new CxContext(sender, "bal", ARGS, arguments);
 
         assertThat(context.sender()).isSameAs(sender);
         assertThat(context.label()).isEqualTo("bal");
+        assertThat(context.arguments()).isSameAs(arguments);
         assertThat(context.raw()).containsExactly("Notch", "5");
     }
 
     @Test
     void copies_the_raw_arguments_defensively() {
         List<String> source = new ArrayList<>(ARGS);
-        CxContext context = new CxContext(FakeSender.console(), "money", source);
+        CxContext context = new CxContext(FakeSender.console(), "money", source, CxArguments.empty());
 
         source.clear();
 
@@ -40,7 +42,7 @@ class CxContextTest {
 
     @Test
     void exposes_the_raw_arguments_as_an_unmodifiable_list() {
-        CxContext context = new CxContext(FakeSender.console(), "money", ARGS);
+        CxContext context = new CxContext(FakeSender.console(), "money", ARGS, CxArguments.empty());
 
         assertThatThrownBy(() -> context.raw().add("extra"))
                 .isInstanceOf(UnsupportedOperationException.class);
@@ -50,11 +52,13 @@ class CxContextTest {
     void rejects_missing_parts() {
         FakeSender sender = FakeSender.player("Steve");
 
-        assertThatThrownBy(() -> new CxContext(null, "money", ARGS))
+        assertThatThrownBy(() -> new CxContext(null, "money", ARGS, CxArguments.empty()))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new CxContext(sender, null, ARGS))
+        assertThatThrownBy(() -> new CxContext(sender, null, ARGS, CxArguments.empty()))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new CxContext(sender, "money", null))
+        assertThatThrownBy(() -> new CxContext(sender, "money", null, CxArguments.empty()))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new CxContext(sender, "money", ARGS, null))
                 .isInstanceOf(NullPointerException.class);
     }
 
@@ -72,7 +76,7 @@ class CxContextTest {
     void carries_a_sender_that_records_what_it_was_told() {
         FakeSender console = FakeSender.console();
 
-        new CxContext(console, "money", Collections.emptyList()).sender().send("done");
+        new CxContext(console, "money", Collections.emptyList(), CxArguments.empty()).sender().send("done");
 
         assertThat(console.received()).containsExactly("done");
     }

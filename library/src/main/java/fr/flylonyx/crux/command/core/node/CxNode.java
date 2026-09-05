@@ -27,6 +27,7 @@ public final class CxNode {
     private final CxArgumentType<?> argumentType;
     private final String permission;
     private final String description;
+    private final String defaultValue;
     private final int priority;
     private final CxHandler handler;
     private final Map<String, CxNode> literalLookup;
@@ -44,6 +45,7 @@ public final class CxNode {
         this.argumentType = declaration.argumentType();
         this.permission = declaration.permission();
         this.description = declaration.description();
+        this.defaultValue = declaration.defaultValue();
         this.priority = declaration.priority();
         this.handler = declaration.handler();
         this.literalLookup = literalLookup;
@@ -112,6 +114,24 @@ public final class CxNode {
     }
 
     /**
+     * Returns the text read when the sender leaves this argument out.
+     *
+     * @return the default, or {@code null} if the argument is required
+     */
+    public String defaultValue() {
+        return this.defaultValue;
+    }
+
+    /**
+     * Reports whether the sender may leave this argument out.
+     *
+     * @return {@code true} if this node declares a default
+     */
+    public boolean isOptional() {
+        return this.defaultValue != null;
+    }
+
+    /**
      * Returns the ordering weight among sibling argument nodes.
      *
      * <p>Higher values are tried first, which is how a narrower type is given the chance
@@ -176,6 +196,9 @@ public final class CxNode {
 
     @Override
     public String toString() {
-        return this.kind == CxNodeKind.LITERAL ? this.name : "<" + this.name + ">";
+        if (this.kind == CxNodeKind.LITERAL) {
+            return this.name;
+        }
+        return this.isOptional() ? "[" + this.name + "]" : "<" + this.name + ">";
     }
 }

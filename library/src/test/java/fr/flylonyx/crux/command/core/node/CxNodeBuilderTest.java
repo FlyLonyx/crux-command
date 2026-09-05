@@ -120,6 +120,51 @@ class CxNodeBuilderTest {
     }
 
     @Nested
+    class OptionalArguments {
+
+        @Test
+        void carries_the_text_read_when_the_argument_is_left_out() {
+            CxNode node = CxNodeBuilder.argument("name", new FakeArgumentType("word"))
+                    .optional("home")
+                    .executes(context -> { })
+                    .build();
+
+            assertThat(node.isOptional()).isTrue();
+            assertThat(node.defaultValue()).isEqualTo("home");
+        }
+
+        @Test
+        void reports_an_argument_without_a_default_as_required() {
+            CxNode node = CxNodeBuilder.argument("name", new FakeArgumentType("word"))
+                    .executes(context -> { })
+                    .build();
+
+            assertThat(node.isOptional()).isFalse();
+            assertThat(node.defaultValue()).isNull();
+        }
+
+        @Test
+        void accepts_an_optional_argument_leading_to_another_one() {
+            CxNode node = CxNodeBuilder.literal("warp")
+                    .then(CxNodeBuilder.argument("name", new FakeArgumentType("word")).optional("spawn")
+                            .then(CxNodeBuilder.argument("world", new FakeArgumentType("word")).optional("world")
+                                    .executes(context -> { })))
+                    .build();
+
+            assertThat(node.arguments()).singleElement().satisfies(name -> {
+                assertThat(name.isOptional()).isTrue();
+                assertThat(name.arguments().get(0).isOptional()).isTrue();
+            });
+        }
+
+        @Test
+        void describes_itself_in_brackets_rather_than_angles() {
+            assertThat(CxNodeBuilder.argument("name", new FakeArgumentType("word"))
+                    .optional("home").executes(context -> { }).build()).hasToString("[name]");
+        }
+    }
+
+    @Nested
     class RejectedDeclarations {
 
         @Test
@@ -178,6 +223,31 @@ class CxNodeBuilderTest {
                     .executes(context -> { }).build())
                     .isInstanceOf(CxDefinitionException.class)
                     .hasMessageContaining("has no type");
+        }
+
+        @Test
+        void a_literal_declaring_a_default() {
+            assertThatThrownBy(() -> runnable("give").optional("all").build())
+                    .isInstanceOf(CxDefinitionException.class)
+                    .hasMessageContaining("only an argument can be left out");
+        }
+
+        @Test
+        void a_default_that_is_null() {
+            assertThatThrownBy(() -> CxNodeBuilder.argument("name", new FakeArgumentType("word")).optional(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+
+        /** Leaving the argument out would then stop at a node that cannot run. */
+        @Test
+        void an_optional_argument_followed_by_a_required_one() {
+            assertThatThrownBy(() -> CxNodeBuilder.literal("warp")
+                    .then(CxNodeBuilder.argument("name", new FakeArgumentType("word")).optional("spawn")
+                            .then(CxNodeBuilder.argument("world", new FakeArgumentType("word"))
+                                    .executes(context -> { })))
+                    .build())
+                    .isInstanceOf(CxDefinitionException.class)
+                    .hasMessageContaining("could never be read");
         }
 
         @Test

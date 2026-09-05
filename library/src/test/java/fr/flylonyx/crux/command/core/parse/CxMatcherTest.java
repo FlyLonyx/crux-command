@@ -149,6 +149,79 @@ class CxMatcherTest {
     }
 
     @Nested
+    class OptionalArguments {
+
+        private CxNodeBuilder optional(String name, String fallback) {
+            return CxNodeBuilder.argument(name, new FakeArgumentType("word")).optional(fallback);
+        }
+
+        @Test
+        void takes_an_optional_argument_as_left_out_when_input_runs_out() {
+            CxNode root = CxNodeBuilder.literal("home")
+                    .then(optional("name", "home").executes(context -> { }))
+                    .build();
+
+            CxMatchResult result = route(root, "");
+
+            assertThat(result.node().name()).isEqualTo("name");
+            assertThat(result.arguments()).singleElement().satisfies(span -> {
+                assertThat(span.isOmitted()).isTrue();
+                assertThat(span.first()).isZero();
+            });
+        }
+
+        @Test
+        void claims_the_token_when_the_sender_did_type_the_argument() {
+            CxNode root = CxNodeBuilder.literal("home")
+                    .then(optional("name", "home").executes(context -> { }))
+                    .build();
+
+            CxMatchResult result = route(root, "work");
+
+            assertThat(result.arguments()).singleElement().satisfies(span -> {
+                assertThat(span.isOmitted()).isFalse();
+                assertThat(span.count()).isEqualTo(1);
+            });
+        }
+
+        @Test
+        void walks_through_every_optional_argument_that_was_left_out() {
+            CxNode root = CxNodeBuilder.literal("warp")
+                    .then(optional("name", "spawn")
+                            .then(optional("world", "world").executes(context -> { })))
+                    .build();
+
+            CxMatchResult result = route(root, "");
+
+            assertThat(result.node().name()).isEqualTo("world");
+            assertThat(result.arguments()).extracting(CxArgumentSpan::node).extracting(CxNode::name)
+                    .containsExactly("name", "world");
+            assertThat(result.arguments()).allMatch(CxArgumentSpan::isOmitted);
+        }
+
+        @Test
+        void leaves_out_only_the_optional_arguments_the_sender_stopped_short_of() {
+            CxNode root = CxNodeBuilder.literal("warp")
+                    .then(optional("name", "spawn")
+                            .then(optional("world", "world").executes(context -> { })))
+                    .build();
+
+            CxMatchResult result = route(root, "nether");
+
+            assertThat(result.arguments()).extracting(CxArgumentSpan::isOmitted).containsExactly(false, true);
+        }
+
+        @Test
+        void still_reports_a_required_argument_as_missing() {
+            CxNode root = CxNodeBuilder.literal("money")
+                    .then(CxNodeBuilder.literal("give").then(word("target")))
+                    .build();
+
+            assertThat(route(root, "give").failure()).isEqualTo(CxKey.MISSING_ARGUMENT);
+        }
+    }
+
+    @Nested
     class Failures {
 
         @Test

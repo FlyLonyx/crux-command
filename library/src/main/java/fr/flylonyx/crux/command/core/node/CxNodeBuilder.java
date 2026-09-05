@@ -44,6 +44,7 @@ public final class CxNodeBuilder {
 
     private String permission;
     private String description = "";
+    private String defaultValue;
     private int priority;
     private CxHandler handler;
 
@@ -109,6 +110,21 @@ public final class CxNodeBuilder {
     }
 
     /**
+     * Lets the sender leave this argument out, reading the given text in its place.
+     *
+     * <p>The text goes through the same type as a typed value, so a player type can accept
+     * {@code self}. Leaving an argument out has to lead somewhere that runs, which
+     * {@link #build()} checks.
+     *
+     * @param value the text read when the argument is left out
+     * @return this builder
+     */
+    public CxNodeBuilder optional(final String value) {
+        this.defaultValue = Objects.requireNonNull(value, "value");
+        return this;
+    }
+
+    /**
      * Sets the ordering weight among sibling argument nodes, highest tried first.
      *
      * @param value the priority
@@ -158,10 +174,12 @@ public final class CxNodeBuilder {
         this.collectChildren(lookup, literals, arguments);
         this.requireReachable(literals, arguments);
 
-        return new CxNode(this,
+        final CxNode built = new CxNode(this,
                 Collections.unmodifiableMap(lookup),
                 Collections.unmodifiableList(literals),
                 Collections.unmodifiableList(arguments));
+        this.requireDefaultUsable(built);
+        return built;
     }
 
     CxNodeKind kind() {
@@ -186,6 +204,10 @@ public final class CxNodeBuilder {
 
     String description() {
         return this.description;
+    }
+
+    String defaultValue() {
+        return this.defaultValue;
     }
 
     int priority() {
@@ -220,6 +242,10 @@ public final class CxNodeBuilder {
 
     private void validateArgument() {
         if (this.kind != CxNodeKind.ARGUMENT) {
+            if (this.defaultValue != null) {
+                throw new CxDefinitionException("The literal '" + this.name
+                        + "' declares a default value, but only an argument can be left out.");
+            }
             return;
         }
         if (this.argumentType == null) {
@@ -295,6 +321,35 @@ public final class CxNodeBuilder {
             throw new CxDefinitionException("The " + this.role() + " '" + this.name
                     + "' has no handler and no children, so reaching it could never do anything.");
         }
+    }
+
+    /**
+     * Rejects a default nothing could read, which means the argument is required after all.
+     */
+    private void requireDefaultUsable(final CxNode built) {
+        if (this.defaultValue != null && !runsWithoutTokens(built)) {
+            throw new CxDefinitionException("The optional argument '" + this.name
+                    + "' has no handler, and nothing below it runs without one, so its default"
+                    + " could never be read.");
+        }
+    }
+
+    /**
+     * Reports whether reaching a node with no token left still runs something.
+     *
+     * <p>Children are built first, so an optional argument here has already passed this
+     * same check; that it exists is enough.
+     */
+    private static boolean runsWithoutTokens(final CxNode node) {
+        if (node.isExecutable()) {
+            return true;
+        }
+        for (final CxNode argument : node.arguments()) {
+            if (argument.isOptional()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isGreedy(final CxNode node) {
