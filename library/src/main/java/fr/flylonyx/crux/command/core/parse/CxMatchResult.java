@@ -14,21 +14,25 @@ import fr.flylonyx.crux.command.message.CxKey;
  * <p>Either a node was reached that can run, or nothing matched. A failure records how far
  * routing got, so {@code /money give Notch} reports a missing amount rather than an
  * unknown sub-command.
+ *
+ * <p>Both outcomes carry the path taken through the tree, which is what a usage line is
+ * built from: a failure has to say what the sender should have typed.
  */
 public final class CxMatchResult {
 
-    private final CxNode node;
+    private final List<CxNode> path;
     private final List<CxArgumentSpan> arguments;
     private final CxKey failure;
     private final String detail;
     private final int depth;
 
-    private CxMatchResult(final CxNode node,
+    private CxMatchResult(final List<CxNode> path,
                           final List<CxArgumentSpan> arguments,
                           final CxKey failure,
                           final String detail,
                           final int depth) {
-        this.node = node;
+
+        this.path = path;
         this.arguments = arguments;
         this.failure = failure;
         this.detail = detail;
@@ -38,14 +42,14 @@ public final class CxMatchResult {
     /**
      * Records a successful match.
      *
-     * @param node      the node whose handler should run
+     * @param path      the nodes walked through, root first, ending on the one to run
      * @param arguments the spans claimed along the way, in order
      * @return the result
+     * @throws IllegalArgumentException if the path is empty
      */
-    public static CxMatchResult matched(final CxNode node, final List<CxArgumentSpan> arguments) {
-        Objects.requireNonNull(node, "node");
+    public static CxMatchResult matched(final List<CxNode> path, final List<CxArgumentSpan> arguments) {
         Objects.requireNonNull(arguments, "arguments");
-        return new CxMatchResult(node, new ArrayList<>(arguments), null, null, 0);
+        return new CxMatchResult(copyOfPath(path), new ArrayList<>(arguments), null, null, 0);
     }
 
     /**
@@ -54,11 +58,17 @@ public final class CxMatchResult {
      * @param failure what went wrong
      * @param detail  the offending token, or the name of the argument that was missing
      * @param depth   how many tokens routing consumed before giving up
+     * @param path    the nodes walked through, root first, ending where routing gave up
      * @return the result
+     * @throws IllegalArgumentException if the path is empty
      */
-    public static CxMatchResult failed(final CxKey failure, final String detail, final int depth) {
+    public static CxMatchResult failed(final CxKey failure,
+                                       final String detail,
+                                       final int depth,
+                                       final List<CxNode> path) {
+
         Objects.requireNonNull(failure, "failure");
-        return new CxMatchResult(null, Collections.emptyList(), failure, detail, depth);
+        return new CxMatchResult(copyOfPath(path), Collections.emptyList(), failure, detail, depth);
     }
 
     /**
@@ -67,7 +77,7 @@ public final class CxMatchResult {
      * @return {@code true} on success
      */
     public boolean isMatched() {
-        return this.node != null;
+        return this.failure == null;
     }
 
     /**
@@ -77,10 +87,21 @@ public final class CxMatchResult {
      * @throws IllegalStateException if routing failed
      */
     public CxNode node() {
-        if (this.node == null) {
+        if (this.failure != null) {
             throw new IllegalStateException("Routing failed with " + this.failure + "; there is no matched node.");
         }
-        return this.node;
+        return this.path.get(this.path.size() - 1);
+    }
+
+    /**
+     * Returns the nodes routing walked through, root first.
+     *
+     * <p>On success it ends on the node to run, on failure on the one routing gave up at.
+     *
+     * @return an unmodifiable list holding at least the root
+     */
+    public List<CxNode> path() {
+        return Collections.unmodifiableList(this.path);
     }
 
     /**
@@ -136,10 +157,18 @@ public final class CxMatchResult {
         return other == null || this.depth > other.depth;
     }
 
+    private static List<CxNode> copyOfPath(final List<CxNode> path) {
+        Objects.requireNonNull(path, "path");
+        if (path.isEmpty()) {
+            throw new IllegalArgumentException("A path holds at least the node the command was registered under.");
+        }
+        return new ArrayList<>(path);
+    }
+
     @Override
     public String toString() {
         return this.isMatched()
-                ? "matched " + this.node + " with " + this.arguments
+                ? "matched " + this.node() + " with " + this.arguments
                 : "failed " + this.failure + " at " + this.depth + (this.detail == null ? "" : " on " + this.detail);
     }
 }

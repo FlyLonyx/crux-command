@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,8 @@ class CxMatchResultTest {
 
     private static final CxNode NODE = CxNodeBuilder.literal("money").executes(context -> { }).build();
 
+    private static final List<CxNode> PATH = Collections.singletonList(NODE);
+
     private static final CxNode ARGUMENT = CxNodeBuilder
             .argument("target", new FakeArgumentType("word"))
             .executes(context -> { })
@@ -27,20 +31,30 @@ class CxMatchResultTest {
     class Success {
 
         @Test
-        void carries_the_node_and_its_spans() {
+        void carries_the_path_its_spans_and_the_node_to_run() {
             CxArgumentSpan span = new CxArgumentSpan(ARGUMENT, 1, 1);
 
-            CxMatchResult result = CxMatchResult.matched(NODE, Collections.singletonList(span));
+            CxMatchResult result = CxMatchResult.matched(Arrays.asList(NODE, ARGUMENT),
+                    Collections.singletonList(span));
 
             assertThat(result.isMatched()).isTrue();
-            assertThat(result.node()).isSameAs(NODE);
+            assertThat(result.path()).containsExactly(NODE, ARGUMENT);
+            assertThat(result.node()).isSameAs(ARGUMENT);
             assertThat(result.arguments()).containsExactly(span);
             assertThat(result.depth()).isZero();
         }
 
         @Test
+        void exposes_the_path_as_an_unmodifiable_list() {
+            CxMatchResult result = CxMatchResult.matched(new ArrayList<>(PATH), Collections.emptyList());
+
+            assertThatThrownBy(() -> result.path().clear())
+                    .isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        @Test
         void copies_the_spans_defensively() {
-            CxMatchResult result = CxMatchResult.matched(NODE,
+            CxMatchResult result = CxMatchResult.matched(PATH,
                     new ArrayList<>(Collections.singletonList(new CxArgumentSpan(ARGUMENT, 0, 1))));
 
             assertThatThrownBy(() -> result.arguments().clear())
@@ -49,7 +63,7 @@ class CxMatchResultTest {
 
         @Test
         void has_no_failure_to_report() {
-            CxMatchResult result = CxMatchResult.matched(NODE, Collections.emptyList());
+            CxMatchResult result = CxMatchResult.matched(PATH, Collections.emptyList());
 
             assertThatThrownBy(result::failure)
                     .isInstanceOf(IllegalStateException.class)
@@ -58,7 +72,7 @@ class CxMatchResultTest {
 
         @Test
         void describes_itself() {
-            CxMatchResult result = CxMatchResult.matched(NODE, Collections.emptyList());
+            CxMatchResult result = CxMatchResult.matched(PATH, Collections.emptyList());
 
             assertThat(result).hasToString("matched money with []");
         }
@@ -67,8 +81,10 @@ class CxMatchResultTest {
         void rejects_missing_parts() {
             assertThatThrownBy(() -> CxMatchResult.matched(null, Collections.emptyList()))
                     .isInstanceOf(NullPointerException.class);
-            assertThatThrownBy(() -> CxMatchResult.matched(NODE, null))
+            assertThatThrownBy(() -> CxMatchResult.matched(PATH, null))
                     .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> CxMatchResult.matched(Collections.emptyList(), Collections.emptyList()))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -77,7 +93,7 @@ class CxMatchResultTest {
 
         @Test
         void carries_the_reason_the_detail_and_the_depth() {
-            CxMatchResult result = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "nope", 2);
+            CxMatchResult result = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "nope", 2, PATH);
 
             assertThat(result.isMatched()).isFalse();
             assertThat(result.failure()).isEqualTo(CxKey.UNKNOWN_SUBCOMMAND);
@@ -88,7 +104,7 @@ class CxMatchResultTest {
 
         @Test
         void has_no_node_to_report() {
-            CxMatchResult result = CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "amount", 1);
+            CxMatchResult result = CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "amount", 1, PATH);
 
             assertThatThrownBy(result::node)
                     .isInstanceOf(IllegalStateException.class)
@@ -97,15 +113,24 @@ class CxMatchResultTest {
 
         @Test
         void describes_itself_with_and_without_a_detail() {
-            assertThat(CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "amount", 1))
+            assertThat(CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "amount", 1, PATH))
                     .hasToString("failed MISSING_ARGUMENT at 1 on amount");
-            assertThat(CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, null, 0))
+            assertThat(CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, null, 0, PATH))
                     .hasToString("failed UNKNOWN_SUBCOMMAND at 0");
         }
 
         @Test
-        void rejects_a_missing_reason() {
-            assertThatThrownBy(() -> CxMatchResult.failed(null, "nope", 0))
+        void carries_the_path_routing_gave_up_on() {
+            CxMatchResult result = CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "amount", 1, PATH);
+
+            assertThat(result.path()).containsExactly(NODE);
+        }
+
+        @Test
+        void rejects_a_missing_reason_or_path() {
+            assertThatThrownBy(() -> CxMatchResult.failed(null, "nope", 0, PATH))
+                    .isInstanceOf(NullPointerException.class);
+            assertThatThrownBy(() -> CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "nope", 0, null))
                     .isInstanceOf(NullPointerException.class);
         }
     }
@@ -184,8 +209,8 @@ class CxMatchResultTest {
 
         @Test
         void a_deeper_failure_is_preferred_over_a_shallower_one() {
-            CxMatchResult shallow = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "a", 1);
-            CxMatchResult deep = CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "b", 3);
+            CxMatchResult shallow = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "a", 1, PATH);
+            CxMatchResult deep = CxMatchResult.failed(CxKey.MISSING_ARGUMENT, "b", 3, PATH);
 
             assertThat(deep.isMoreInformativeThan(shallow)).isTrue();
             assertThat(shallow.isMoreInformativeThan(deep)).isFalse();
@@ -194,8 +219,8 @@ class CxMatchResultTest {
 
         @Test
         void equally_deep_failures_keep_the_one_already_held() {
-            CxMatchResult first = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "a", 2);
-            CxMatchResult second = CxMatchResult.failed(CxKey.TOO_MANY_ARGUMENTS, "b", 2);
+            CxMatchResult first = CxMatchResult.failed(CxKey.UNKNOWN_SUBCOMMAND, "a", 2, PATH);
+            CxMatchResult second = CxMatchResult.failed(CxKey.TOO_MANY_ARGUMENTS, "b", 2, PATH);
 
             assertThat(second.isMoreInformativeThan(first)).isFalse();
         }

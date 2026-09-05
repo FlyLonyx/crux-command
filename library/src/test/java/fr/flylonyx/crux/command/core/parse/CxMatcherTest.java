@@ -90,6 +90,53 @@ class CxMatcherTest {
     }
 
     @Nested
+    class Path {
+
+        @Test
+        void records_every_node_walked_through_root_first() {
+            CxNode root = CxNodeBuilder.literal("money")
+                    .then(CxNodeBuilder.literal("give").then(word("target")))
+                    .build();
+
+            CxMatchResult result = route(root, "give Notch");
+
+            assertThat(result.path()).extracting(CxNode::name).containsExactly("money", "give", "target");
+        }
+
+        @Test
+        void records_the_root_alone_when_nothing_follows_it() {
+            CxNode root = literal("money").build();
+
+            assertThat(route(root, "").path()).containsExactly(root);
+        }
+
+        /** A failure has to say what should have been typed, which needs where it got to. */
+        @Test
+        void records_where_routing_gave_up() {
+            CxNode root = CxNodeBuilder.literal("money")
+                    .then(CxNodeBuilder.literal("give").then(word("target")))
+                    .build();
+
+            CxMatchResult result = route(root, "give");
+
+            assertThat(result.isMatched()).isFalse();
+            assertThat(result.path()).extracting(CxNode::name).containsExactly("money", "give");
+        }
+
+        @Test
+        void records_the_path_of_the_failure_that_got_furthest() {
+            CxNode root = CxNodeBuilder.literal("money")
+                    .then(literal("top"))
+                    .then(CxNodeBuilder.literal("give").then(wordBranch("target").then(word("amount"))))
+                    .build();
+
+            CxMatchResult result = route(root, "give Notch");
+
+            assertThat(result.path()).extracting(CxNode::name).containsExactly("money", "give", "target");
+        }
+    }
+
+    @Nested
     class Arguments {
 
         @Test
