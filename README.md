@@ -1,4 +1,4 @@
-# Crux Command
+# Crux Commands
 
 **A command framework for PaperSpigot 1.8.8 plugins.**
 
